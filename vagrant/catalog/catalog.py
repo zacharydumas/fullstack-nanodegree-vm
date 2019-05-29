@@ -11,15 +11,11 @@ from catalog_database import Base, User, CatalogItem
 
 app = Flask(__name__)
 
-# Displays a list of categories and the 10 latest items
+# Displays a list of items within the requested category if a category is provided, otherwise displays the latest 10 items
 @app.route('/')
-def catalog():
-    return 'Displays a list of categories and the 10 latest items'
-
-# Displays a list of items within the requested category
 @app.route('/<category>')
-def showCategory(category):
-    return 'Displays a list of items within the requested category'
+def showCategory(category = None):
+    return 'Displays a list of items within the requested category if a category is provided, otherwise displays the latest 10 items'
 
 # Displays the description of an item
 @app.route('/<category>/<item>')
