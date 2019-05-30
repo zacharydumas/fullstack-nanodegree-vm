@@ -12,7 +12,7 @@ from catalog_database import Base, User, CatalogItem
 app = Flask(__name__)
 
 # Connect to Database and create database session
-engine = create_engine('sqlite:///catalog.db')
+engine = create_engine('sqlite:///catalog.db', connect_args={'check_same_thread': False})
 Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
@@ -29,7 +29,9 @@ def showCategory(category = None, item = None):
         items = session.query(CatalogItem).filter_by(category = category).order_by(asc(CatalogItem.name))
     else:
         items = session.query(CatalogItem).order_by(desc(CatalogItem.id)).limit(10).all()
-    return render_template('catalog.html', categories = categories, item = item, items = items)
+    if item != None:
+        item = session.query(CatalogItem).filter_by(category = category, name = item).one()
+    return render_template('catalog_new.html', categories = categories, entry = item, items = items)
 
 # GET displays the page to create a new item, POST adds a new item to the database
 @app.route('/<category>/new', methods = ['GET','POST'])
@@ -60,7 +62,8 @@ def categoryJson(category):
 # GET returns a json object of an item
 @app.route('/api/v1/<category>/<item>')
 def itemJson(category,item):
-    return 'GET returns a json object of an item'
+    item = session.query(CatalogItem).filter_by(category = category, name = item).one()
+    return jsonify(item.serialize)
 
 # Authentication --------------------------------------------
 # POST logs the user in 
