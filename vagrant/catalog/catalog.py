@@ -17,22 +17,19 @@ Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
-# Displays a list of items within the requested category if a category is provided, otherwise displays the latest 10 items
+# Displays the description of an item if an item is provited, otherwise displays a list of items 
+# within the requested category if a category is provided, otherwise displays the latest 10 items
 @app.route('/')
 @app.route('/<category>')
-def showCategory(category = None):
+@app.route('/<category>/<item>')
+def showCategory(category = None, item = None):
     query = session.query(CatalogItem.category.distinct().label('category')).order_by(asc(CatalogItem.category))
-    categories = [item.category for item in query.all()]
+    categories = [row.category for row in query.all()]
     if category != None:
         items = session.query(CatalogItem).filter_by(category = category).order_by(asc(CatalogItem.name))
     else:
         items = session.query(CatalogItem).order_by(desc(CatalogItem.id)).limit(10).all()
-    return render_template('catalog.html', categories = categories, items = items)
-
-# Displays the description of an item
-@app.route('/<category>/<item>')
-def showItem(category, item):
-    return 'Displays the description of %s' % item
+    return render_template('catalog.html', categories = categories, item = item, items = items)
 
 # GET displays the page to create a new item, POST adds a new item to the database
 @app.route('/<category>/new', methods = ['GET','POST'])
