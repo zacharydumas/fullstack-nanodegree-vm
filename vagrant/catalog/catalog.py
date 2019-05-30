@@ -59,7 +59,9 @@ def catalogJson():
 # GET returns a json object of the items within a category
 @app.route('/api/v1/<category>')
 def categoryJson(category):
-    return 'GET returns a json object of the items within a category'
+    query = session.query(CatalogItem).filter_by(category = category).order_by(asc(CatalogItem.name))
+    items = [row.name for row in query.all()]
+    return jsonify(items)
 
 # GET returns a json object of an item
 @app.route('/api/v1/<category>/<item>')
