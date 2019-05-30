@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+{% block title %}Catalog{% endblock %}
+{% block content %}
+<section>
+	<ul>
+		{% for category in categories %}
+			<li><a href={{url_for('showCategory', category = category)}}>{{category}}</a></li>
+		{% endfor %}
+	</ul>
+</section>
+<section>
+	<ul>
+		<{% for item in items %}
+			<li><a href={{url_for('showItem', category = item.category, item = item.name)}}>{{item.name}}</a></li>
+		{% endfor %}
+	</ul>
+</section>
+{% endblock %}
