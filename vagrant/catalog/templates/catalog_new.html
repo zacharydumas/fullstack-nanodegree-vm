@@ -9,10 +9,15 @@
 	</ul>
 </section>
 <section>
+	{% if entry != None %}
+		<h1>{{entry.name}}</h1>
+		<p>{{entry.description}}</p>
+	{% else %}
 	<ul>
-		<{% for item in items %}
+		{% for item in items %}
 			<li><a href={{url_for('showCategory', category = item.category, item = item.name)}}>{{item.name}}</a></li>
 		{% endfor %}
 	</ul>
+	{% endif %}
 </section>
 {% endblock %}
