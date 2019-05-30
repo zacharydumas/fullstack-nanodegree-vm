@@ -60,8 +60,8 @@ def catalogJson():
 @app.route('/api/v1/<category>')
 def categoryJson(category):
     query = session.query(CatalogItem).filter_by(category = category).order_by(asc(CatalogItem.name))
-    items = [row.name for row in query.all()]
-    return jsonify(items)
+    items = query.all()
+    return jsonify([item.serialize for item in items])
 
 # GET returns a json object of an item
 @app.route('/api/v1/<category>/<item>')
