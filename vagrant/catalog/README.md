@@ -27,6 +27,7 @@ The `catalog` folder should be placed in the `vagrant` directory, which is share
 * log into vagrant with `vagrant ssh`.
 * `cd` to the location of your `vagrant/catalog` directory.
 * run `python catalog_database.py` to create the database.
+* copy your `client_secrets.json` into the catalog directory.
 * run `python catalog.py` to start the server.
 * visit the server in a browser at https://localhost:8000
 
