@@ -1,1 +1,3 @@
+.gitignore
 vagrant/catalog/catalog.db
+vagrant/catalog/client_secrets.json
