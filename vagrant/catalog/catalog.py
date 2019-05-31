@@ -52,9 +52,9 @@ def deleteItem(category,item):
 # GET returns a json object of the categories
 @app.route('/api/v1')
 def catalogJson():
-    query = session.query(CatalogItem.category.distinct().label('category')).order_by(asc(CatalogItem.category))
-    categories = [row.category for row in query.all()]
-    return jsonify(categories)
+    query = session.query(CatalogItem).order_by(asc(CatalogItem.name))
+    items = query.all()
+    return jsonify([item.serialize for item in items])
 
 # GET returns a json object of the items within a category
 @app.route('/api/v1/<category>')
