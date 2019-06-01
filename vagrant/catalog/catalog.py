@@ -9,7 +9,11 @@ from sqlalchemy.orm import sessionmaker
 
 from catalog_database import Base, User, CatalogItem
 
-from oauth2client.client import 
+from oauth2client.client import flow_from_clientsecrets
+from oauth2client.client import FlowExchangeError
+import httplib2
+import requests
+import json
 
 app = Flask(__name__)
 
@@ -91,12 +95,28 @@ def itemJson(category,item):
 # redirect the user to OAuth provider
 @app.route('/login')
 def login():
-    return 'log a user in'
+    flow = flow_from_clientsecrets('client_secrets.json', scope='https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile',redirect_uri=url_for('connect', _external=True))
+    return redirect(flow.step1_get_authorize_url())
 
 # POST logs the user in 
-@app.route('/gconnect', methods = ['POST'])
-def gconnect():
-    return 'log a user in'
+@app.route('/connect', methods = ['Get','POST'])
+def connect():
+    flow = flow_from_clientsecrets('client_secrets.json', scope='https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile',redirect_uri=url_for('connect', _external=True))
+    try:
+        code = request.args.get('code')
+        if code == None:
+            return "access was denied"     
+        credentials = flow.step2_exchange(code)
+    except FlowExchangeError:
+        return "failed to aqcuire authorization"
+    userinfo_url = "https://www.googleapis.com/oauth2/v2/userinfo"
+    params = {'access_token': credentials.access_token}
+    answer = requests.get(userinfo_url, params=params)
+    data = answer.json()
+    login_session['name'] = data['name']
+    login_session['picture'] = data['picture']
+    login_session['email'] = data['email']
+    return redirect(url_for('showCategory'))
 
 # POST logs a user out
 @app.route('/disconnect', methods = ['POST'])
@@ -104,6 +124,6 @@ def disconnect():
     return 'log a user out'
 
 if __name__ == '__main__':
-    app.secret_key = 'super_secret_key'
+    app.secret_key = 'secret_key'
     app.debug = True
     app.run(host='0.0.0.0', port=8000)
