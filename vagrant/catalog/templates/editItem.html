@@ -6,11 +6,11 @@
 		<legend>Edit an item.</legend>
 		item created by: {{item.user_email}}<br>
 		<label for="name">Name:</label><br>
-		<input type="text" name="name" value="{{item.name}}"><br>
+		<input type="text" name="name" value="{{item.name}}" required><br>
 		<label for="description">Description:</label><br>
-		<textarea class="form-control" maxlength="250" rows="3" name="description">{{item.description}}</textarea><br>
+		<textarea class="form-control" maxlength="250" rows="3" name="description" required>{{item.description}}</textarea><br>
 		<label for="category">Category:</label><br>
-		<input type="text" name="category" value="{{item.category}}"><br>
+		<input type="text" name="category" value="{{item.category}}" required><br>
 		<input type="submit" value="Submit">
 	</fieldset>
 </form>
