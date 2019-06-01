@@ -85,7 +85,10 @@ def createItem():
             flash("Error: You must be logged in to create an item.")
             return redirect(url_for('showCategory'))
     else:
-        return render_template('createItem.html')
+        if login_session['email'] is not None:
+            return render_template('createItem.html')
+        else:
+            return redirect(url_for('login'))
 
 # GET displays the page to edit a item, POST edits an item in the database
 
@@ -110,10 +113,13 @@ def editItem(category, item):
                 )
             return redirect(url_for('showCategory'))
     else:
-        item = session.query(CatalogItem).filter_by(
-            category=category, name=item
-            ).limit(1).one()
-        return render_template('editItem.html', item=item)
+        if login_session['email'] is not None:
+            item = session.query(CatalogItem).filter_by(
+                category=category, name=item
+                ).limit(1).one()
+            return render_template('editItem.html', item=item)
+        else:
+            return redirect(url_for('login'))
 
 # GET displays a confirmation page to delete an item, POST deletes the item
 
@@ -144,7 +150,10 @@ def deleteItem(category, item):
             )
             return redirect(url_for('showCategory'))
     else:
-        return render_template('deleteItem.html', category=category, item=item)
+        if login_session['email'] is not None:
+            return render_template('deleteItem.html', category=category, item=item)
+        else:
+            return redirect(url_for('login'))
 
 # API -----------------------------------------------------
 # GET returns a json object of the categories
