@@ -44,10 +44,12 @@ def showCategory(category = None, item = None):
 def createItem():
     if request.method == 'POST':
         if login_session['email'] == None:
-            return "Error: You must be logged in to create an item."
+            flash("Error: You must be logged in to create an item.")
+            return redirect(url_for('showCategory'))
         newItem = CatalogItem(name = request.form['name'], description = request.form['description'], category = request.form['category'],user_email = login_session['email'])
         session.add(newItem)
         session.commit()
+        flash(request.form['name'] + " created.")
         return redirect(url_for('showCategory', category = request.form['category'], item = request.form['name']))
     else:
         return render_template('createItem.html')
@@ -62,9 +64,11 @@ def editItem(category,item):
             item.description = request.form['description']
             item.category = request.form['category']
             session.commit()
+            flash(request.form['name'] + " edited.")
             return redirect(url_for('showCategory'))
         else:
-            return "Error: Items can only be edited by the user who made them"
+            flash("Error: You must be logged in and have created an item to edit that item.")
+            return redirect(url_for('showCategory'))
     else:
         item = session.query(CatalogItem).filter_by(category = category, name = item).limit(1).one()
         return render_template('editItem.html', item = item)
@@ -73,13 +77,19 @@ def editItem(category,item):
 @app.route('/<category>/<item>/delete', methods = ['GET','POST'])
 def deleteItem(category,item):
     if request.method == 'POST':
-        item = session.query(CatalogItem).filter_by(category = category, name = item).limit(1).one()
+        if session.query(CatalogItem).filter_by(category = category, name = item).limit(1).count() > 0:
+            item = session.query(CatalogItem).filter_by(category = category, name = item).limit(1).one()
+        else:
+            flash(item + " not found")
+            return redirect(url_for('showCategory'))
         if login_session['email'] == item.user_email:
             session.delete(item)
             session.commit()
+            flash(item + " deleted.")
             return redirect(url_for('showCategory'))
         else:
-            return "Error: Items can only be deleted by the user who made them"
+            flash("Error: Items can only be deleted by the user who made them.")
+            return redirect(url_for('showCategory'))
     else:
         return render_template('deleteItem.html', category = category, item = item)
 
