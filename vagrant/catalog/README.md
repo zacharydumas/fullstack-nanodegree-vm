@@ -30,6 +30,7 @@ The `catalog` folder should be placed in the `vagrant` directory, which is share
 * run `python catalog.py` to start the server.
 * visit the server in a browser at https://localhost:8000.
 * perform a `GET` at https://localhost:8000/api/v1 to recieve a json of all items in catalog.
+* perform a `GET` at https://localhost:8000/api/v1/<category>/<item> to recieve a json of a single item.
 
 ------------------------------------
 ## Authors
