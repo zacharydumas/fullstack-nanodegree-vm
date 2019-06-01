@@ -6,6 +6,7 @@
 	<body>
 		<header>Sports Gear Catalog</header>
 		<a href="{{url_for('login')}}">Login</a>
+		<a href="{{url_for('disconnect')}}">Logout</a>
 		<a href="{{url_for('showCategory')}}">Home</a>
 		<a href="{{url_for('createItem')}}">New Item</a><br>
 		{% with messages = get_flashed_messages() %}

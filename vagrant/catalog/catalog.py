@@ -77,6 +77,7 @@ def editItem(category,item):
 @app.route('/<category>/<item>/delete', methods = ['GET','POST'])
 def deleteItem(category,item):
     if request.method == 'POST':
+        itemName = item
         if session.query(CatalogItem).filter_by(category = category, name = item).limit(1).count() > 0:
             item = session.query(CatalogItem).filter_by(category = category, name = item).limit(1).one()
         else:
@@ -85,7 +86,7 @@ def deleteItem(category,item):
         if login_session['email'] == item.user_email:
             session.delete(item)
             session.commit()
-            flash(item + " deleted.")
+            flash(itemName + " deleted.")
             return redirect(url_for('showCategory'))
         else:
             flash("Error: Items can only be deleted by the user who made them.")
@@ -141,12 +142,27 @@ def connect():
     login_session['name'] = data['name']
     login_session['picture'] = data['picture']
     login_session['email'] = data['email']
+    login_session['access_token'] = credentials.access_token
+    flash('logged in as ' + login_session['name'])
     return redirect(url_for('showCategory'))
 
 # POST logs a user out
-@app.route('/disconnect', methods = ['POST'])
+@app.route('/disconnect', methods = ['POST','GET'])
 def disconnect():
-    return 'log a user out'
+    access_token = login_session.get('access_token')
+    if access_token is None:
+        flash('User not logged in')
+        return redirect(url_for('showCategory'))
+    url = 'https://accounts.google.com/o/oauth2/revoke?token=%s' % access_token
+    h = httplib2.Http()
+    result = h.request(url, 'GET')[0]
+    if result['status'] == '200':
+        login_session['email'] = None
+        flash('User successfully logged out.')
+        return redirect(url_for('showCategory'))
+    else:
+        flash('Failed to log user out')
+        return redirect(url_for('showCategory'))
 
 if __name__ == '__main__':
     app.secret_key = 'secret_key'
