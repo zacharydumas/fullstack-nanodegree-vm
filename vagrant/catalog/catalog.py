@@ -65,95 +65,95 @@ def showCategory(category=None, item=None):
 
 @app.route('/new', methods=['GET', 'POST'])
 def createItem():
-    if request.method == 'POST':
-        if login_session['email'] is not None:
-            newItem = CatalogItem(
-                name=request.form['name'],
-                description=request.form['description'],
-                category=request.form['category'],
-                user_email=login_session['email']
-                )
-            session.add(newItem)
-            session.commit()
-            flash(request.form['name'] + " created.")
-            return redirect(url_for(
-                'showCategory',
-                category=request.form['category'],
-                item=request.form['name'])
-                )
-        else:
-            flash("Error: You must be logged in to create an item.")
-            return redirect(url_for('showCategory'))
-    else:
-        if login_session['email'] is not None:
+    if login_session['email'] is not None:
+        if request.method == 'POST':
+            if login_session['email'] is not None:
+                newItem = CatalogItem(
+                    name=request.form['name'],
+                    description=request.form['description'],
+                    category=request.form['category'],
+                    user_email=login_session['email']
+                    )
+                session.add(newItem)
+                session.commit()
+                flash(request.form['name'] + " created.")
+                return redirect(url_for(
+                    'showCategory',
+                    category=request.form['category'],
+                    item=request.form['name'])
+                    )
+            else:
+                flash("Error: You must be logged in to create an item.")
+                return redirect(url_for('showCategory'))
+        else:       
             return render_template('createItem.html')
-        else:
-            return redirect(url_for('login'))
+    else:
+        return redirect(url_for('login'))
 
 # GET displays the page to edit a item, POST edits an item in the database
 
 
 @app.route('/<category>/<item>/edit', methods=['GET', 'POST'])
 def editItem(category, item):
-    if request.method == 'POST':
-        item = session.query(CatalogItem).filter_by(
-            category=category, name=item
-            ).limit(1).one()
-        if login_session['email'] == item.user_email:
-            item.name = request.form['name']
-            item.description = request.form['description']
-            item.category = request.form['category']
-            session.commit()
-            flash(request.form['name'] + " edited.")
-            return redirect(url_for('showCategory'))
-        else:
-            flash(
-                '''Error: You must be logged in and
-                 have created an item to edit that item.'''
-                )
-            return redirect(url_for('showCategory'))
-    else:
-        if login_session['email'] is not None:
+    if login_session['email'] is not None:
+        if request.method == 'POST':
             item = session.query(CatalogItem).filter_by(
                 category=category, name=item
                 ).limit(1).one()
-            return render_template('editItem.html', item=item)
+            if login_session['email'] == item.user_email:
+                item.name = request.form['name']
+                item.description = request.form['description']
+                item.category = request.form['category']
+                session.commit()
+                flash(request.form['name'] + " edited.")
+                return redirect(url_for('showCategory'))
+            else:
+                flash(
+                    '''Error: You must be logged in and
+                    have created an item to edit that item.'''
+                )
+                return redirect(url_for('showCategory'))
         else:
-            return redirect(url_for('login'))
+                item = session.query(CatalogItem).filter_by(
+                    category=category, name=item
+                    ).limit(1).one()
+                return render_template('editItem.html', item=item)
+    else:
+        return redirect(url_for('login'))
 
 # GET displays a confirmation page to delete an item, POST deletes the item
 
 
 @app.route('/<category>/<item>/delete', methods=['GET', 'POST'])
 def deleteItem(category, item):
-    if request.method == 'POST':
-        itemName = item
-        if session.query(CatalogItem).filter_by(
-                category=category, name=item
-                ).limit(1).count() > 0:
-            item = session.query(CatalogItem).filter_by(
-                category=category,
-                name=item
-                ).limit(1).one()
-        else:
-            flash(item + " not found")
-            return redirect(url_for('showCategory'))
-        if login_session['email'] == item.user_email:
-            session.delete(item)
-            session.commit()
-            flash(itemName + " deleted.")
-            return redirect(url_for('showCategory'))
-        else:
-            flash(
-                '''Error: Items can only be deleted
-                 by the user who made them.'''
-            )
-            return redirect(url_for('showCategory'))
-    else:
-        if login_session['email'] is not None:
+    if login_session['email'] is not None:
+        if request.method == 'POST':
+            itemName = item
+            if session.query(CatalogItem).filter_by(
+                    category=category, name=item
+                    ).limit(1).count() > 0:
+                item = session.query(CatalogItem).filter_by(
+                    category=category,
+                    name=item
+                    ).limit(1).one()
+            else:
+                flash(item + " not found")
+                return redirect(url_for('showCategory'))
+            if login_session['email'] == item.user_email:
+                session.delete(item)
+                session.commit()
+                flash(itemName + " deleted.")
+                return redirect(url_for('showCategory'))
+            else:
+                flash(
+                    '''Error: Items can only be deleted
+                     by the user who made them.'''
+                )
+                return redirect(url_for('showCategory'))
+        else:       
             return render_template('deleteItem.html', category=category, item=item)
-        else:
-            return redirect(url_for('login'))
+    else:
+        return redirect(url_for('login'))
 
 # API -----------------------------------------------------
 # GET returns a json object of the categories
