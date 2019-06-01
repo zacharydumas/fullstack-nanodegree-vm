@@ -43,8 +43,9 @@ def showCategory(category = None, item = None):
 @app.route('/new', methods = ['GET','POST'])
 def createItem():
     if request.method == 'POST':
-        email = "placeholder@gmail.com"
-        newItem = CatalogItem(name = request.form['name'], description = request.form['description'], category = request.form['category'])
+        if login_session['email'] == None:
+            return "Error: You must be logged in to create an item."
+        newItem = CatalogItem(name = request.form['name'], description = request.form['description'], category = request.form['category'],user_email = login_session['email'])
         session.add(newItem)
         session.commit()
         return redirect(url_for('showCategory', category = request.form['category'], item = request.form['name']))
@@ -55,18 +56,30 @@ def createItem():
 @app.route('/<category>/<item>/edit', methods = ['GET','POST'])
 def editItem(category,item):
     if request.method == 'POST':
-        pass
+        item = session.query(CatalogItem).filter_by(category = category, name = item).limit(1).one()
+        if login_session['email'] == item.user_email:
+            item.name = request.form['name']
+            item.description = request.form['description']
+            item.category = request.form['category']
+            session.commit()
+            return redirect(url_for('showCategory'))
+        else:
+            return "Error: Items can only be edited by the user who made them"
     else:
-        return render_template('editItem.html')
+        item = session.query(CatalogItem).filter_by(category = category, name = item).limit(1).one()
+        return render_template('editItem.html', item = item)
 
 # GET displays a confirmation page to delete an item, POST deletes the item
 @app.route('/<category>/<item>/delete', methods = ['GET','POST'])
 def deleteItem(category,item):
     if request.method == 'POST':
         item = session.query(CatalogItem).filter_by(category = category, name = item).limit(1).one()
-        session.delete(item)
-        session.commit()
-        return redirect(url_for('showCategory'))
+        if login_session['email'] == item.user_email:
+            session.delete(item)
+            session.commit()
+            return redirect(url_for('showCategory'))
+        else:
+            return "Error: Items can only be deleted by the user who made them"
     else:
         return render_template('deleteItem.html', category = category, item = item)
 
