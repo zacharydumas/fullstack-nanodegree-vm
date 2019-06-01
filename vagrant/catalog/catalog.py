@@ -85,8 +85,11 @@ def createItem():
             else:
                 flash("Error: You must be logged in to create an item.")
                 return redirect(url_for('showCategory'))
-        else:       
-            return render_template('createItem.html')
+        else:
+            return render_template(
+                'createItem.html',
+                login_session=login_session
+                )
     else:
         return redirect(url_for('login'))
 
@@ -117,7 +120,9 @@ def editItem(category, item):
                 item = session.query(CatalogItem).filter_by(
                     category=category, name=item
                     ).limit(1).one()
-                return render_template('editItem.html', item=item)
+                return render_template(
+                    'editItem.html', item=item, login_session=login_session
+                    )
     else:
         return redirect(url_for('login'))
 
@@ -150,8 +155,11 @@ def deleteItem(category, item):
                      by the user who made them.'''
                 )
                 return redirect(url_for('showCategory'))
-        else:       
-            return render_template('deleteItem.html', category=category, item=item)
+        else:
+            return render_template(
+                'deleteItem.html', category=category, item=item,
+                login_session=login_session
+                )
     else:
         return redirect(url_for('login'))
 
