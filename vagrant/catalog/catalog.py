@@ -37,7 +37,7 @@ def showCategory(category = None, item = None):
         items = session.query(CatalogItem).order_by(desc(CatalogItem.id)).limit(10).all()
     if item != None:
         item = session.query(CatalogItem).filter_by(category = category, name = item).limit(1).one()
-    return render_template('catalog_new.html', categories = categories, entry = item, items = items)
+    return render_template('catalog_new.html', categories = categories, entry = item, items = items, login_session = login_session)
 
 # GET displays the page to create a new item, POST adds a new item to the database
 @app.route('/new', methods = ['GET','POST'])
@@ -115,6 +115,7 @@ def login():
 @app.route('/connect', methods = ['Get','POST'])
 def connect():
     flow = flow_from_clientsecrets('client_secrets.json', scope='https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile',redirect_uri=url_for('connect', _external=True))
+    # exchange the token for credentials
     try:
         code = request.args.get('code')
         if code == None:
@@ -122,6 +123,7 @@ def connect():
         credentials = flow.step2_exchange(code)
     except FlowExchangeError:
         return "failed to aqcuire authorization"
+    # use the credentials to get the users information and store it in the login_session
     userinfo_url = "https://www.googleapis.com/oauth2/v2/userinfo"
     params = {'access_token': credentials.access_token}
     answer = requests.get(userinfo_url, params=params)
